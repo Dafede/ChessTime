@@ -7,9 +7,9 @@ public class ChessTime extends Game {
 	public void create() {
 		// TODO Auto-generated method stub
 		
-		//setScreen(new SplashScreen());
-		//setScreen(new GameScreen());
-		setScreen(new GameScreenNewEdition());
+		setScreen(new SplashScreen());
+		
+		//setScreen(new GameScreenNewEdition());
 	}
 	@Override
 	public void dispose() {
