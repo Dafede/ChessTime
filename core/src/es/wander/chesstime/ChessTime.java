@@ -8,7 +8,7 @@ public class ChessTime extends Game {
 		// TODO Auto-generated method stub
 		
 		setScreen(new SplashScreen());
-		
+		//setScreen(new LobbyScreen());
 		//setScreen(new GameScreenNewEdition());
 	}
 	@Override

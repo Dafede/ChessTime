@@ -1,18 +1,28 @@
 package es.wander.chesstime;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.Timer;
+import com.badlogic.gdx.utils.Timer.Task;
 
 public class GameScreenNewEdition implements Screen, InputProcessor{
     
     SpriteBatch batch;
-    
-    private int W=Gdx.graphics.getWidth();
+	private Texture backgroundTexture;
+    //private int W=Gdx.graphics.getWidth();
     private int H=Gdx.graphics.getHeight();
     private int sizeCell = Gdx.graphics.getWidth()/8;
     private int reduxPiece = 10; //Esta es la unica variable que se introduce a mano, habria que calcularla en proporcion, segun el tipo de dispositivo
@@ -37,7 +47,12 @@ public class GameScreenNewEdition implements Screen, InputProcessor{
     
     private boolean turnPlayer=false; // Variable que indica en que turno estamos: FALSE = WHITE ; TRUE = BLACK
     
+    Sprite sendButton;
+    int originX=-1, destinyY=-1,originY=-1,destinyX=-1;
     
+    String resultChallengeTurn="";
+    String inProcess="";
+    boolean notFileExists=false;
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
     // POR IMPLEMENTAR:
@@ -50,23 +65,48 @@ public class GameScreenNewEdition implements Screen, InputProcessor{
     
     // JAQUES (EL JUGADOR NO PUEDE MOVER OTRA FICHAS QUE NO SEA PARA EVITAR EL MATE)
     
+    // AL EMPEZAR, SI HACES CLICK EN BLANCAS Y LUEGO DOS CLICKS EN NEGRAS, PUEDES MOVER NEGRAS SIN HABER MOVIDO BLANCAS    
     
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
     @Override
     public void show() {
-        
+    	backgroundTexture = new Texture("menuBackground.png");
         batch = new SpriteBatch();
-        for(int i=0;i<8;i++){
-            for(int j=0;j<8;j++){
-                chessPosition[i][j]=0;
-            }
-        }
         
+      //ver cual es el turno de la partida
+        try {
+			 resultChallengeTurn = sendGet_getChallengeTurn(actualUser1(),actualUser2());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+        
+        load();
+    
+		if (notFileExists) {
+			// cambiar esto por la carga de una partida guardada, si no, dejarlo
+			for (int i = 0; i < 8; i++) {
+				for (int j = 0; j < 8; j++) {
+					chessPosition[i][j] = 0;
+				}
+			}
+		}
+		
+        // tengo que actualizar la juagada 
+		//if(resultChallengeTurn.equals(UserSession.User)){		}
+		
         initializeBoard();
-        initializeBlack();
-        initializeWhite();
+        spritesBlack();
+        spritesWhite();
         
+		if (notFileExists) {
+			initializeBlack();
+			initializeWhite();
+		}else{ 
+			drawChess();
+		}
+		
+		
         tableHighlight = new Sprite(new Texture("highlight.png"));
         tableHighlight.setSize(sizeCell,sizeCell);
         tableHighlight.setPosition(getPositionX(0), getPositionY(0));
@@ -84,6 +124,32 @@ public class GameScreenNewEdition implements Screen, InputProcessor{
         
         Gdx.input.setInputProcessor(this);
         
+        sendButton = new Sprite(new Texture("sendButton.png"));
+        sendButton.setPosition(Gdx.graphics.getWidth()/2-sendButton.getWidth()/2, (Gdx.graphics.getHeight()-sizeCell*8) - (Gdx.graphics.getHeight()-sizeCell*8)/2 -sendButton.getHeight()/2 );
+
+    }
+    
+    public String actualUser1(){
+    	if(UserSession.game1User1!=null || UserSession.game1User1!="")return UserSession.game1User1;
+		//UserSession.game1User2="";
+		if(UserSession.game2User1!=null || UserSession.game2User1!="")return UserSession.game2User1;
+		//UserSession.game2User2="";
+		if(UserSession.game3User1!=null || UserSession.game3User1!="")return UserSession.game3User1;
+		//UserSession.game3User2="";
+		return "";
+    	
+    }
+    public String actualUser2(){
+    	
+    	//UserSession.game1User1="";
+		if(UserSession.game1User2!=null || UserSession.game1User2!="")return UserSession.game1User2;
+		//UserSession.game2User1="";
+		if(UserSession.game2User2!=null || UserSession.game2User2!="")return UserSession.game2User2;
+		//UserSession.game3User1="";
+		if(UserSession.game3User2!=null || UserSession.game3User2!="")return UserSession.game3User2;
+		
+		return "";
+    	
     }
     
     @Override
@@ -93,6 +159,7 @@ public class GameScreenNewEdition implements Screen, InputProcessor{
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         
         batch.begin();
+        batch.draw(backgroundTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         drawBoard();
         tableHighlight.draw(batch);
         drawBlack();
@@ -103,7 +170,7 @@ public class GameScreenNewEdition implements Screen, InputProcessor{
                 whereGoChess[i][j].draw(batch);
             }
         }
-        
+        sendButton.draw(batch);
         batch.end();
         
     }
@@ -158,17 +225,7 @@ public class GameScreenNewEdition implements Screen, InputProcessor{
     
     //POSICIONES DE LAS CELDAS, SOLO UTILIZADO ESTE METODO PARA DIBUJAR EL TABLERO
     public int getPositionX(int x){
-        switch (x) {
-            case 0:  return 0;
-            case 1:  return sizeCell;
-            case 2:  return sizeCell*2;
-            case 3:  return sizeCell*3;
-            case 4:  return sizeCell*4;
-            case 5:  return sizeCell*5;
-            case 6:  return sizeCell*6;
-            case 7:  return sizeCell*7;
-            default: return -1;
-        }
+    	return sizeCell*x;
     }
     
     //POSICIONES DE LAS CELDAS, SOLO UTILIZADO ESTE METODO PARA DIBUJAR EL TABLERO
@@ -254,170 +311,249 @@ public class GameScreenNewEdition implements Screen, InputProcessor{
         kingW.draw(batch);
     }
     
+    public void drawChess(){
+    	
+    	 pawnW1.setPosition(getPositionXPiece(getPositionXByNumberPiece(1)), getPositionYPiece(getPositionYByNumberPiece(1)));
+         pawnW2.setPosition(getPositionXPiece(getPositionXByNumberPiece(2)), getPositionYPiece(getPositionYByNumberPiece(2)));
+         pawnW3.setPosition(getPositionXPiece(getPositionXByNumberPiece(3)), getPositionYPiece(getPositionYByNumberPiece(3)));
+         pawnW4.setPosition(getPositionXPiece(getPositionXByNumberPiece(4)), getPositionYPiece(getPositionYByNumberPiece(4)));
+         pawnW5.setPosition(getPositionXPiece(getPositionXByNumberPiece(5)), getPositionYPiece(getPositionYByNumberPiece(5)));
+         pawnW6.setPosition(getPositionXPiece(getPositionXByNumberPiece(6)), getPositionYPiece(getPositionYByNumberPiece(6)));
+         pawnW7.setPosition(getPositionXPiece(getPositionXByNumberPiece(7)), getPositionYPiece(getPositionYByNumberPiece(7)));
+         pawnW8.setPosition(getPositionXPiece(getPositionXByNumberPiece(8)), getPositionYPiece(getPositionYByNumberPiece(8)));
+         rookW1.setPosition(getPositionXPiece(getPositionXByNumberPiece(9)), getPositionYPiece(getPositionYByNumberPiece(9)));
+         rookW2.setPosition(getPositionXPiece(getPositionXByNumberPiece(10)), getPositionYPiece(getPositionYByNumberPiece(10)));
+         knightW1.setPosition(getPositionXPiece(getPositionXByNumberPiece(11)), getPositionYPiece(getPositionYByNumberPiece(11)));
+         knightW2.setPosition(getPositionXPiece(getPositionXByNumberPiece(12)), getPositionYPiece(getPositionYByNumberPiece(12)));
+         bishopW1.setPosition(getPositionXPiece(getPositionXByNumberPiece(13)), getPositionYPiece(getPositionYByNumberPiece(13)));
+         bishopW2.setPosition(getPositionXPiece(getPositionXByNumberPiece(14)), getPositionYPiece(getPositionYByNumberPiece(14)));
+         queenW.setPosition(getPositionXPiece(getPositionXByNumberPiece(15)), getPositionYPiece(getPositionYByNumberPiece(15)));
+         kingW.setPosition(getPositionXPiece(getPositionXByNumberPiece(16)), getPositionYPiece(getPositionYByNumberPiece(16)));
+         
+         
+         pawnB1.setPosition(getPositionXPiece(getPositionXByNumberPiece(17)), getPositionYPiece(getPositionYByNumberPiece(17)));
+         pawnB2.setPosition(getPositionXPiece(getPositionXByNumberPiece(18)), getPositionYPiece(getPositionYByNumberPiece(18)));
+         pawnB3.setPosition(getPositionXPiece(getPositionXByNumberPiece(19)), getPositionYPiece(getPositionYByNumberPiece(19)));
+         pawnB4.setPosition(getPositionXPiece(getPositionXByNumberPiece(20)), getPositionYPiece(getPositionYByNumberPiece(20)));
+         pawnB5.setPosition(getPositionXPiece(getPositionXByNumberPiece(21)), getPositionYPiece(getPositionYByNumberPiece(21)));
+         pawnB6.setPosition(getPositionXPiece(getPositionXByNumberPiece(22)), getPositionYPiece(getPositionYByNumberPiece(22)));
+         pawnB7.setPosition(getPositionXPiece(getPositionXByNumberPiece(23)), getPositionYPiece(getPositionYByNumberPiece(23)));
+         pawnB8.setPosition(getPositionXPiece(getPositionXByNumberPiece(24)), getPositionYPiece(getPositionYByNumberPiece(24)));
+         rookB1.setPosition(getPositionXPiece(getPositionXByNumberPiece(25)), getPositionYPiece(getPositionYByNumberPiece(25)));
+         rookB2.setPosition(getPositionXPiece(getPositionXByNumberPiece(26)), getPositionYPiece(getPositionYByNumberPiece(26)));
+         knightB1.setPosition(getPositionXPiece(getPositionXByNumberPiece(27)), getPositionYPiece(getPositionYByNumberPiece(27)));
+         knightB2.setPosition(getPositionXPiece(getPositionXByNumberPiece(28)), getPositionYPiece(getPositionYByNumberPiece(28)));
+         bishopB1.setPosition(getPositionXPiece(getPositionXByNumberPiece(29)), getPositionYPiece(getPositionYByNumberPiece(29)));
+         bishopB2.setPosition(getPositionXPiece(getPositionXByNumberPiece(30)), getPositionYPiece(getPositionYByNumberPiece(30)));
+         queenB.setPosition(getPositionXPiece(getPositionXByNumberPiece(31)), getPositionYPiece(getPositionYByNumberPiece(31)));
+         kingB.setPosition(getPositionXPiece(getPositionXByNumberPiece(32)), getPositionYPiece(getPositionYByNumberPiece(32)));
+     
+    }
+    
+    public void spritesBlack(){
+    	pawnB1 = new Sprite(new Texture("pawnB.png"));
+        pawnB1.setSize(sizePiece,sizePiece);
+        pawnB2 = new Sprite(new Texture("pawnB.png"));
+        pawnB2.setSize(sizePiece,sizePiece);
+        pawnB3 = new Sprite(new Texture("pawnB.png"));
+        pawnB3.setSize(sizePiece,sizePiece);
+        pawnB4 = new Sprite(new Texture("pawnB.png"));
+        pawnB4.setSize(sizePiece,sizePiece);
+        pawnB5 = new Sprite(new Texture("pawnB.png"));
+        pawnB5.setSize(sizePiece,sizePiece);
+        pawnB6 = new Sprite(new Texture("pawnB.png"));
+        pawnB6.setSize(sizePiece,sizePiece);
+        pawnB7 = new Sprite(new Texture("pawnB.png"));
+        pawnB7.setSize(sizePiece,sizePiece);
+        pawnB8 = new Sprite(new Texture("pawnB.png"));
+        pawnB8.setSize(sizePiece,sizePiece);
+        rookB1 = new Sprite(new Texture("rookB.png"));
+        rookB1.setSize(sizePiece,sizePiece);
+        rookB2 = new Sprite(new Texture("rookB.png"));
+        rookB2.setSize(sizePiece,sizePiece);
+        knightB1 = new Sprite(new Texture("knightB.png"));
+        knightB1.setSize(sizePiece,sizePiece);
+        knightB2 = new Sprite(new Texture("knightB.png"));
+        knightB2.setSize(sizePiece,sizePiece);
+        bishopB1 = new Sprite(new Texture("bishopB.png"));
+        bishopB1.setSize(sizePiece,sizePiece);
+        bishopB2 = new Sprite(new Texture("bishopB.png"));
+        bishopB2.setSize(sizePiece,sizePiece);
+        queenB = new Sprite(new Texture("queenB.png"));
+        queenB.setSize(sizePiece,sizePiece);
+        kingB = new Sprite(new Texture("kingB.png"));
+        kingB.setSize(sizePiece,sizePiece);
+    }
+    public void spritesWhite(){
+    	pawnW1 = new Sprite(new Texture("pawnW.png"));
+        pawnW1.setSize(sizePiece,sizePiece);
+ 
+        
+        pawnW2 = new Sprite(new Texture("pawnW.png"));
+        pawnW2.setSize(sizePiece,sizePiece);
+
+        
+        pawnW3 = new Sprite(new Texture("pawnW.png"));
+        pawnW3.setSize(sizePiece,sizePiece);
+
+        
+        pawnW4 = new Sprite(new Texture("pawnW.png"));
+        pawnW4.setSize(sizePiece,sizePiece);
+
+        
+        pawnW5 = new Sprite(new Texture("pawnW.png"));
+        pawnW5.setSize(sizePiece,sizePiece);
+
+        pawnW6 = new Sprite(new Texture("pawnW.png"));
+        pawnW6.setSize(sizePiece,sizePiece);
+
+        
+        pawnW7 = new Sprite(new Texture("pawnW.png"));
+        pawnW7.setSize(sizePiece,sizePiece);
+
+        
+        pawnW8 = new Sprite(new Texture("pawnW.png"));
+        pawnW8.setSize(sizePiece,sizePiece);
+ 
+        
+        rookW1 = new Sprite(new Texture("rookW.png"));
+        rookW1.setSize(sizePiece,sizePiece);
+
+        rookW2 = new Sprite(new Texture("rookW.png"));
+        rookW2.setSize(sizePiece,sizePiece);
+
+        
+        knightW1 = new Sprite(new Texture("knightW.png"));
+        knightW1.setSize(sizePiece,sizePiece);
+
+        
+        knightW2 = new Sprite(new Texture("knightW.png"));
+        knightW2.setSize(sizePiece,sizePiece);
+
+        
+        bishopW1 = new Sprite(new Texture("bishopW.png"));
+        bishopW1.setSize(sizePiece,sizePiece);
+  
+        
+        bishopW2 = new Sprite(new Texture("bishopW.png"));
+        bishopW2.setSize(sizePiece,sizePiece);
+
+        
+        queenW = new Sprite(new Texture("queenW.png"));
+        queenW.setSize(sizePiece,sizePiece);
+  
+        
+        kingW = new Sprite(new Texture("kingW.png"));
+        kingW.setSize(sizePiece,sizePiece);
+
+    }
     public void initializeBlack(){
         
-        pawnB1 = new Sprite(new Texture("pawnB.png"));
-        pawnB1.setSize(sizePiece,sizePiece);
+       
         pawnB1.setPosition(getPositionXPiece(0), getPositionYPiece(1));
         chessPosition[0][1]=17;
         
-        pawnB2 = new Sprite(new Texture("pawnB.png"));
-        pawnB2.setSize(sizePiece,sizePiece);
+      
         pawnB2.setPosition(getPositionXPiece(1), getPositionYPiece(1));
         chessPosition[1][1]=18;
         
-        pawnB3 = new Sprite(new Texture("pawnB.png"));
-        pawnB3.setSize(sizePiece,sizePiece);
+
         pawnB3.setPosition(getPositionXPiece(2), getPositionYPiece(1));
         chessPosition[2][1]=19;
-        
-        pawnB4 = new Sprite(new Texture("pawnB.png"));
-        pawnB4.setSize(sizePiece,sizePiece);
+
         pawnB4.setPosition(getPositionXPiece(3), getPositionYPiece(1));
         chessPosition[3][1]=20;
-        
-        pawnB5 = new Sprite(new Texture("pawnB.png"));
-        pawnB5.setSize(sizePiece,sizePiece);
+
         pawnB5.setPosition(getPositionXPiece(4), getPositionYPiece(1));
         chessPosition[4][1]=21;
         
-        pawnB6 = new Sprite(new Texture("pawnB.png"));
-        pawnB6.setSize(sizePiece,sizePiece);
+
         pawnB6.setPosition(getPositionXPiece(5), getPositionYPiece(1));
         chessPosition[5][1]=22;
-        
-        pawnB7 = new Sprite(new Texture("pawnB.png"));
-        pawnB7.setSize(sizePiece,sizePiece);
+ 
         pawnB7.setPosition(getPositionXPiece(6), getPositionYPiece(1));
         chessPosition[6][1]=23;
         
-        pawnB8 = new Sprite(new Texture("pawnB.png"));
-        pawnB8.setSize(sizePiece,sizePiece);
+  
         pawnB8.setPosition(getPositionXPiece(7), getPositionYPiece(1));
         chessPosition[7][1]=24;
-        
-        rookB1 = new Sprite(new Texture("rookB.png"));
-        rookB1.setSize(sizePiece,sizePiece);
+    
         rookB1.setPosition(getPositionXPiece(0), getPositionYPiece(0));
         chessPosition[0][0]=25;
-        
-        rookB2 = new Sprite(new Texture("rookB.png"));
-        rookB2.setSize(sizePiece,sizePiece);
+
         rookB2.setPosition(getPositionXPiece(7), getPositionYPiece(0));
         chessPosition[7][0]=26;
-        
-        knightB1 = new Sprite(new Texture("knightB.png"));
-        knightB1.setSize(sizePiece,sizePiece);
+
         knightB1.setPosition(getPositionXPiece(1), getPositionYPiece(0));
         chessPosition[1][0]=27;
-        
-        knightB2 = new Sprite(new Texture("knightB.png"));
-        knightB2.setSize(sizePiece,sizePiece);
+    
         knightB2.setPosition(getPositionXPiece(6), getPositionYPiece(0));
         chessPosition[6][0]=28;
-        
-        bishopB1 = new Sprite(new Texture("bishopB.png"));
-        bishopB1.setSize(sizePiece,sizePiece);
+
         bishopB1.setPosition(getPositionXPiece(2), getPositionYPiece(0));
         chessPosition[2][0]=29;
-        
-        bishopB2 = new Sprite(new Texture("bishopB.png"));
-        bishopB2.setSize(sizePiece,sizePiece);
+
         bishopB2.setPosition(getPositionXPiece(5), getPositionYPiece(0));
         chessPosition[5][0]=30;
-        
-        queenB = new Sprite(new Texture("queenB.png"));
-        queenB.setSize(sizePiece,sizePiece);
+
         queenB.setPosition(getPositionXPiece(4), getPositionYPiece(0));
         chessPosition[4][0]=31;
         
-        kingB = new Sprite(new Texture("kingB.png"));
-        kingB.setSize(sizePiece,sizePiece);
+
         kingB.setPosition(getPositionXPiece(3), getPositionYPiece(0));
         chessPosition[3][0]=32;
         
         
     }
-    
     public void initializeWhite(){
-        
-        pawnW1 = new Sprite(new Texture("pawnW.png"));
-        pawnW1.setSize(sizePiece,sizePiece);
+
         pawnW1.setPosition(getPositionXPiece(0), getPositionYPiece(6));
         chessPosition[0][6]=1;
         
-        pawnW2 = new Sprite(new Texture("pawnW.png"));
-        pawnW2.setSize(sizePiece,sizePiece);
+       
         pawnW2.setPosition(getPositionXPiece(1), getPositionYPiece(6));
         chessPosition[1][6]=2;
         
-        pawnW3 = new Sprite(new Texture("pawnW.png"));
-        pawnW3.setSize(sizePiece,sizePiece);
+       
         pawnW3.setPosition(getPositionXPiece(2), getPositionYPiece(6));
         chessPosition[2][6]=3;
-        
-        pawnW4 = new Sprite(new Texture("pawnW.png"));
-        pawnW4.setSize(sizePiece,sizePiece);
+  
         pawnW4.setPosition(getPositionXPiece(3), getPositionYPiece(6));
         chessPosition[3][6]=4;
-        
-        pawnW5 = new Sprite(new Texture("pawnW.png"));
-        pawnW5.setSize(sizePiece,sizePiece);
+
         pawnW5.setPosition(getPositionXPiece(4), getPositionYPiece(6));
         chessPosition[4][6]=5;
         
-        pawnW6 = new Sprite(new Texture("pawnW.png"));
-        pawnW6.setSize(sizePiece,sizePiece);
         pawnW6.setPosition(getPositionXPiece(5), getPositionYPiece(6));
         chessPosition[5][6]=6;
-        
-        pawnW7 = new Sprite(new Texture("pawnW.png"));
-        pawnW7.setSize(sizePiece,sizePiece);
+
         pawnW7.setPosition(getPositionXPiece(6), getPositionYPiece(6));
         chessPosition[6][6]=7;
-        
-        pawnW8 = new Sprite(new Texture("pawnW.png"));
-        pawnW8.setSize(sizePiece,sizePiece);
+
         pawnW8.setPosition(getPositionXPiece(7), getPositionYPiece(6));
         chessPosition[7][6]=8;
         
-        rookW1 = new Sprite(new Texture("rookW.png"));
-        rookW1.setSize(sizePiece,sizePiece);
         rookW1.setPosition(getPositionXPiece(0), getPositionYPiece(7));
         chessPosition[0][7]=9;
         
-        rookW2 = new Sprite(new Texture("rookW.png"));
-        rookW2.setSize(sizePiece,sizePiece);
         rookW2.setPosition(getPositionXPiece(7), getPositionYPiece(7));
         chessPosition[7][7]=10;
-        
-        knightW1 = new Sprite(new Texture("knightW.png"));
-        knightW1.setSize(sizePiece,sizePiece);
+
         knightW1.setPosition(getPositionXPiece(1), getPositionYPiece(7));
         chessPosition[1][7]=11;
-        
-        knightW2 = new Sprite(new Texture("knightW.png"));
-        knightW2.setSize(sizePiece,sizePiece);
+    
         knightW2.setPosition(getPositionXPiece(6), getPositionYPiece(7));
         chessPosition[6][7]=12;
         
-        bishopW1 = new Sprite(new Texture("bishopW.png"));
-        bishopW1.setSize(sizePiece,sizePiece);
         bishopW1.setPosition(getPositionXPiece(2), getPositionYPiece(7));
         chessPosition[2][7]=13;
         
-        bishopW2 = new Sprite(new Texture("bishopW.png"));
-        bishopW2.setSize(sizePiece,sizePiece);
         bishopW2.setPosition(getPositionXPiece(5), getPositionYPiece(7));
         chessPosition[5][7]=14;
-        
-        queenW = new Sprite(new Texture("queenW.png"));
-        queenW.setSize(sizePiece,sizePiece);
+       
         queenW.setPosition(getPositionXPiece(4), getPositionYPiece(7));
         chessPosition[4][7]=15;
         
-        kingW = new Sprite(new Texture("kingW.png"));
-        kingW.setSize(sizePiece,sizePiece);
         kingW.setPosition(getPositionXPiece(3), getPositionYPiece(7));
         chessPosition[3][7]=16;
         
@@ -514,38 +650,62 @@ public class GameScreenNewEdition implements Screen, InputProcessor{
     }
     
     @Override
-    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        
-        //Cuando toco la pantalla se dan varios casos:
-        //1
-        // que haya tocado una pieza
-        //2
-        //que haya tocad una posicion a la que mover una pieza
-        
-        if(!whoPieceTouched(screenX,screenY) && isActivewhereGoChessBool())whoMoveTouched(screenX,screenY);
-        
-        return false;
+	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+
+		// Cuando toco la pantalla se dan varios casos:
+		// 1
+		// que haya tocado una pieza
+		// 2
+		// que haya tocad una posicion a la que mover una pieza
+
+		if (resultChallengeTurn.equals(UserSession.User)) {
+			if (!whoPieceTouched(screenX, screenY)
+					&& isActivewhereGoChessBool())
+				whoMoveTouched(screenX, screenY);
+
+			if (sendButton.getBoundingRectangle().contains(screenX,
+					Gdx.graphics.getHeight() - screenY)) {
+				sendButton.setScale(1.1f);
+			}
+
+		}
+		return false;
+
+	}
+    public void pritnTableroi(){
+    	 for(int i=0;i<8;i++){
+             for(int j=0;j<8;j++){
+                 System.out.print(chessPosition[j][i]);
+             }
+             System.out.println();
+         }
     }
-    
     //REVISAR ESTE METODO; SALTA ERROR DE VEZ EN CUANDO (SOLO EN VERSION MOBIL)
     public void whoMoveTouched(int x, int y){
         for(int i=0;i<8;i++){
             for(int j=0;j<8;j++){
                 if(whereGoChess[i][j].getBoundingRectangle().contains(x, Gdx.graphics.getHeight() - y) && whereGoChessBool[i][j]==true ){
                 	//MUEVE FICHA a x E y
+                	
+                	originX=getPositionXByNumberPiece(numberPieceActive);
+                    originY=getPositionYByNumberPiece(numberPieceActive);
                     chessPosition[getPositionXByNumberPiece(numberPieceActive)][getPositionYByNumberPiece(numberPieceActive)]=0;
                     
                     if(chessPosition[i][j]!=0){
                     	//
-                    	// ARREGLAR ESTO PARA MEJOR .... DIOX
+                    	// ARREGLAR ESTO PARA MEJOR .... DIOX // es cuando alguien coje la pieza de su oponente
                     	//
                     	getSpriteById(chessPosition[i][j]).setPosition(-50, -50);
                     }
                     
+                    
+                    destinyX=i;
+                    destinyY=j;
                     getSpriteById(numberPieceActive).setPosition(getPositionXPiece(i), getPositionYPiece(j));
                     chessPosition[i][j]=numberPieceActive;
                     resetWhereGoHighlightAndBool();
                     tableHighlight.setAlpha(0);
+                    //pritnTableroi();
                 }
             }
         }
@@ -1412,7 +1572,6 @@ public class GameScreenNewEdition implements Screen, InputProcessor{
                     
                     return true;
                 }
-                System.out.println("---");
                 
             }
             if ( pawnW2.getBoundingRectangle().contains(x, Gdx.graphics.getHeight() - y) )
@@ -1587,9 +1746,98 @@ public class GameScreenNewEdition implements Screen, InputProcessor{
     
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        // TODO Auto-generated method stub
+    	//si es mi turno, juego, si no, no puedo hacer nada(deshabilitar el boton sen)
+    	//System.out.println(UserSession.User);
+    	//System.out.println(resultChallengeTurn);
+    	if(resultChallengeTurn.equals(UserSession.User)){ 
+    		
+    	if ( sendButton.getBoundingRectangle().contains(screenX, Gdx.graphics.getHeight() - screenY) )
+		 {
+    		sendButton.setScale(1);
+    		
+    		//obtenemos si la partida esta en proceso (inProgress)
+    		try {
+				inProcess = sendGet_isInProcess(actualUser1(),actualUser2());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+    		//en este caso es que tengo que realizar la primera jugada (es el que a creado la partida quien esta jugando la 1º jugada)
+    		if(inProcess.equals("0") && resultChallengeTurn.equals(UserSession.User)){
+    			//no guarda por que espero a que el otro acepte la partida
+    			
+    		}
+    		else{
+    			save();	
+    		}
+    		//si es la primera jugada del USUARIO RETADO tenemos que aceptarla si juega
+    		if(resultChallengeTurn.equals(UserSession.User) && inProcess.equals("0") && actualUser2().equals(UserSession.User)){
+    			//seteamos inProcess = 1 para aceptar la partida
+    			try {
+					sendGet_setInProcessOne(actualUser1(),actualUser2());
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+    			//guardamos la partida
+    			save();
+    		}
+    		else{
+    			if(resultChallengeTurn.equals(UserSession.User))
+    			save();
+    		}
+    		
+    		//enviamos jugada
+    		try {
+    			sendGet_play(actualUser1(),actualUser2(),originX,originY,destinyX, destinyY);
+    		} catch (Exception e) {
+    			// TODO Auto-generated catch block
+    			e.printStackTrace();
+    		}	
+    			
+    		UserSession.game1User1="";
+    		UserSession.game1User2="";
+    		UserSession.game2User1="";
+    		UserSession.game2User2="";
+    		UserSession.game3User1="";
+    		UserSession.game3User2="";
+    		
+    		Timer.schedule(new Task() {
+				@Override
+				public void run() {
+					((Game)Gdx.app.getApplicationListener()).setScreen(new LobbyScreen());
+				}
+			}, 2);
+    		
+		 }
+    	}
         return false;
-    }
+    } 
+    
+	private void save() {
+		UserSession save;
+		FileHandle file = Gdx.files.local("bin/" + actualUser1() + "vs"	+ actualUser2());
+		if (file.exists()) {
+			Json json = new Json();
+			save = json.fromJson(UserSession.class, file);
+		} else {
+			save = new UserSession();
+		}
+		save.setChess(chessPosition);
+		Json json = new Json();
+		file.writeString(json.prettyPrint(save), false);
+	}
+
+	private void load() {
+		UserSession load;
+		FileHandle file = Gdx.files.local("bin/" + actualUser1() + "vs"	+ actualUser2());
+		if (file.exists()) {
+			Json json = new Json();
+			load = json.fromJson(UserSession.class, file);
+		} else {
+			load = new UserSession();
+			notFileExists = true;
+		}
+		chessPosition = load.getChess();
+	}
     
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
@@ -1607,6 +1855,52 @@ public class GameScreenNewEdition implements Screen, InputProcessor{
     public boolean scrolled(int amount) {
         // TODO Auto-generated method stub
         return false;
+    }
+    
+    private String sendGet_getChallengeTurn(String user1, String user2) throws Exception {
+		String url = "http://84.123.125.224/chesstime/getChallengeTurn.php?user1="+user1+"&user2="+user2;
+		String response="";
+		URL obj = new URL(url);
+		HttpURLConnection con = (HttpURLConnection) obj.openConnection(); 
+		BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+		response = in.readLine();
+		in.close();
+		return response;
+	}
+    private String sendGet_isInProcess(String user1, String user2) throws Exception {
+  		String url = "http://84.123.125.224/chesstime/isInProcess.php?user1="+user1+"&user2="+user2;
+  		String response="";
+  		URL obj = new URL(url);
+  		HttpURLConnection con = (HttpURLConnection) obj.openConnection(); 
+  		BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+  		response = in.readLine();
+  		in.close();
+  		return response;
+  	}
+    private String sendGet_play(String user1, String user2, int originX,int originY, int destinyX, int destinyY) throws Exception {
+    	String url = "http://84.123.125.224/chesstime/play.php?user1="+ user1 + "&user2=" + user2 + "&originX=" + originX + "&originY="+ originY + "&destinyX=" + destinyX + "&destinyY=" + destinyY + "&turn=" + getOtherUser();
+		String response = "";
+		URL obj = new URL(url);
+		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+		BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+		response = in.readLine();
+		in.close();
+		return response;
+	}
+    private String sendGet_setInProcessOne(String user1, String user2) throws Exception {
+  		String url = "http://84.123.125.224/chesstime/setInProcessOne.php?user1="+user1+"&user2="+user2;
+  		String response="";
+  		URL obj = new URL(url);
+  		HttpURLConnection con = (HttpURLConnection) obj.openConnection(); 
+  		BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+  		response = in.readLine();
+  		in.close();
+  		return response;
+  	}
+    
+    public String getOtherUser(){
+    	if(UserSession.User.equals(actualUser1())) return actualUser2();
+    	else return actualUser1();
     }
     
 }

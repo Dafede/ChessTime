@@ -17,7 +17,7 @@ public class GameScreen implements Screen, InputProcessor{
 
 	private float Wi=Gdx.graphics.getWidth();
 	private float Hi=Gdx.graphics.getHeight();
-	private int W=Gdx.graphics.getWidth();
+	//private int W=Gdx.graphics.getWidth();
 	private int H=Gdx.graphics.getHeight();
 	
 	/*
