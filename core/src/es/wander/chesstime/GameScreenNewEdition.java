@@ -75,17 +75,27 @@ public class GameScreenNewEdition implements Screen, InputProcessor{
     @Override
     public void show() {
     	backgroundTexture = new Texture("menuBackground.png");
-        batch = new SpriteBatch();
+        batch = new SpriteBatch();	
         
       //ver cual es el turno de la partida
         try {
-        	
 			 resultChallengeTurn = sendGet_getChallengeTurn(actualUser1(),actualUser2());
+			 System.out.println(actualUser1() + " ^ " +resultChallengeTurn);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
         
         //condicion para imponer el turno de blancas o negras, el jugador que reta siempre es blancas,
+        System.out.println("game1User1: "+UserSession.game1User1);
+        System.out.println("game1User2: "+UserSession.game1User2);
+        System.out.println("game2User1: "+UserSession.game2User1);
+        System.out.println("game2User2: "+UserSession.game2User2);
+        System.out.println("game3User1: "+UserSession.game3User1);
+        System.out.println("game3User2: "+UserSession.game3User2);
+        
+        System.out.println("AKI");
+        System.out.println(actualUser1() + " - " +resultChallengeTurn);
+        System.out.println("AKA");
         if(resultChallengeTurn.equals(actualUser1()))turnPlayer=false;
         else turnPlayer=true;
         
@@ -101,10 +111,6 @@ public class GameScreenNewEdition implements Screen, InputProcessor{
 			}
 		}
 
-
-		
-		
-		
         initializeBoard();
         spritesBlack();
         spritesWhite();
@@ -134,8 +140,7 @@ public class GameScreenNewEdition implements Screen, InputProcessor{
 			  drawChess();
 			  }
 			}
-		
-		
+
         tableHighlight = new Sprite(new Texture("highlight.png"));
         tableHighlight.setSize(sizeCell,sizeCell);
         tableHighlight.setPosition(getPositionX(0), getPositionY(0));
@@ -150,13 +155,13 @@ public class GameScreenNewEdition implements Screen, InputProcessor{
                 whereGoChessBool[i][j]=false;
             }
         }
-        
-        Gdx.input.setInputProcessor(this);
-        
+
         sendButton = new Sprite(new Texture("sendButton.png"));
         sendButton.setPosition(Gdx.graphics.getWidth()/2-sendButton.getWidth()/2, (Gdx.graphics.getHeight()-sizeCell*8) - (Gdx.graphics.getHeight()-sizeCell*8)/2 -sendButton.getHeight()/2 );
-
-    }
+	
+        Gdx.input.setInputProcessor(this);
+    }//RENDEREND
+    
     public void getActuCoords(String actuCoords){
     	String substringUsers = "";
 		int x;
@@ -182,27 +187,16 @@ public class GameScreenNewEdition implements Screen, InputProcessor{
 			}
     }
     public String actualUser1(){
-    	
-    	if(UserSession.game1User1!=null || UserSession.game1User1!="")return UserSession.game1User1;
-		//UserSession.game1User2="";
-		if(UserSession.game2User1!=null || UserSession.game2User1!="")return UserSession.game2User1;
-		//UserSession.game2User2="";
-		if(UserSession.game3User1!=null || UserSession.game3User1!="")return UserSession.game3User1;
-		//UserSession.game3User2="";
+    	if(UserSession.game1User1!="")return UserSession.game1User1;
+		if(UserSession.game2User1!="")return UserSession.game2User1;
+		if(UserSession.game3User1!="")return UserSession.game3User1;
 		return "";
-    	
     }
     public String actualUser2(){
-    	
-    	//UserSession.game1User1="";
-		if(UserSession.game1User2!=null || UserSession.game1User2!="")return UserSession.game1User2;
-		//UserSession.game2User1="";
-		if(UserSession.game2User2!=null || UserSession.game2User2!="")return UserSession.game2User2;
-		//UserSession.game3User1="";
-		if(UserSession.game3User2!=null || UserSession.game3User2!="")return UserSession.game3User2;
-		
+		if(UserSession.game1User2!="")return UserSession.game1User2;
+		if(UserSession.game2User2!="")return UserSession.game2User2;
+		if(UserSession.game3User2!="")return UserSession.game3User2;
 		return "";
-    	
     }
     
     @Override
@@ -210,7 +204,8 @@ public class GameScreenNewEdition implements Screen, InputProcessor{
         
         Gdx.gl.glClearColor(0.078f, 0.588f, 0.784f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        
+
+			
         batch.begin();
         batch.draw(backgroundTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         drawBoard();
@@ -225,7 +220,8 @@ public class GameScreenNewEdition implements Screen, InputProcessor{
         }
         sendButton.draw(batch);
         batch.end();
-        
+    	
+			
     }
     
     public void initializeBoard(){
@@ -1886,7 +1882,7 @@ public class GameScreenNewEdition implements Screen, InputProcessor{
 	private void load() {
 		UserSession load;
 		FileHandle file;
-		System.out.println(actualUser1()+" - "+UserSession.User);
+		//System.out.println(actualUser1()+" - "+UserSession.User);
 		
 		if(actualUser1().equals(UserSession.User))
 			file = Gdx.files.local("bin/" + actualUser1() + "vs"	+ actualUser2());
@@ -1928,6 +1924,7 @@ public class GameScreenNewEdition implements Screen, InputProcessor{
 		HttpURLConnection con = (HttpURLConnection) obj.openConnection(); 
 		BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
 		response = in.readLine();
+		System.out.println("respones: "+response);
 		in.close();
 		return response;
 	}

@@ -584,7 +584,7 @@ public class LobbyScreen implements Screen, InputProcessor, TextInputListener {
 		if(userInProcess1){
 		if (exampleChallengeButton.getBoundingRectangle().contains(screenX,Gdx.graphics.getHeight() - screenY)) {
 			exampleChallengeButton.setScale(1);
-			System.out.println(usersChallengeToMe[0]+ " - " +usersChallengeToMe[1]);
+			
 			UserSession.game1User1=usersChallengeInProcess[0];
 			UserSession.game1User2=usersChallengeInProcess[1];
 			
@@ -594,7 +594,11 @@ public class LobbyScreen implements Screen, InputProcessor, TextInputListener {
 		if(userInProcess2){
 		if (exampleChallengeButton2.getBoundingRectangle().contains(screenX,Gdx.graphics.getHeight() - screenY)) {
 			exampleChallengeButton2.setScale(1);
-			
+/*
+			System.out.println(usersChallengeInProcess[0]+ " - " +usersChallengeInProcess[1]);
+			System.out.println(usersChallengeInProcess[2]+ " - " +usersChallengeInProcess[3]);
+			System.out.println(usersChallengeInProcess[4]+ " - " +usersChallengeInProcess[5]);
+			*/
 			UserSession.game2User1=usersChallengeInProcess[2];
 			UserSession.game2User2=usersChallengeInProcess[3];			
 			
@@ -613,11 +617,11 @@ public class LobbyScreen implements Screen, InputProcessor, TextInputListener {
 		
 		if (NexampleChallengeButton.getBoundingRectangle().contains(screenX,Gdx.graphics.getHeight() - screenY)) {
 			NexampleChallengeButton.setScale(1);
-			
+			/*
 			System.out.println(usersChallengeToMe[0]+ " - " +usersChallengeToMe[1]);
 			System.out.println(usersChallengeToMe[2]+ " - " +usersChallengeToMe[3]);
 			System.out.println(usersChallengeToMe[4]+ " - " +usersChallengeToMe[5]);
-			
+			*/
 			UserSession.game1User1=usersChallengeToMe[0];
 			UserSession.game1User2=usersChallengeToMe[1];
 			
@@ -625,7 +629,7 @@ public class LobbyScreen implements Screen, InputProcessor, TextInputListener {
 		}
 		if (NexampleChallengeButton2.getBoundingRectangle().contains(screenX,Gdx.graphics.getHeight() - screenY)) {
 			NexampleChallengeButton2.setScale(1);
-			
+
 			UserSession.game2User1=usersChallengeToMe[2];
 			UserSession.game2User2=usersChallengeToMe[3];
 			
