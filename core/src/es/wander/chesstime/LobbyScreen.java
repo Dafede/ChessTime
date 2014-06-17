@@ -238,7 +238,7 @@ public class LobbyScreen implements Screen, InputProcessor, TextInputListener {
 		
 		refreshButton.draw(batch);
 		
-
+		
 		if(userInProcess1){
 			exampleChallenge.draw(batch);
 			exampleProcess.draw(batch);
@@ -264,6 +264,7 @@ public class LobbyScreen implements Screen, InputProcessor, TextInputListener {
 		//////aki dibujamos los retos que no estan en proceso, es decir los que me han mandado
 		////// tengo que posicionarlos de manera dinamica segun el numero de los que hayan en proceso
 		if(!userInProcess1){
+			
 			breakifs2=false;
 			breakifs3=false;
 			if(userInProcessToMe1){
@@ -580,14 +581,17 @@ public class LobbyScreen implements Screen, InputProcessor, TextInputListener {
 		}
 		
 		//PLAY BUTTONS
+		if(userInProcess1){
 		if (exampleChallengeButton.getBoundingRectangle().contains(screenX,Gdx.graphics.getHeight() - screenY)) {
 			exampleChallengeButton.setScale(1);
-			
+			System.out.println(usersChallengeToMe[0]+ " - " +usersChallengeToMe[1]);
 			UserSession.game1User1=usersChallengeInProcess[0];
 			UserSession.game1User2=usersChallengeInProcess[1];
 			
 			((Game)Gdx.app.getApplicationListener()).setScreen(new GameScreenNewEdition());
-		}
+		}}
+		
+		if(userInProcess2){
 		if (exampleChallengeButton2.getBoundingRectangle().contains(screenX,Gdx.graphics.getHeight() - screenY)) {
 			exampleChallengeButton2.setScale(1);
 			
@@ -595,7 +599,8 @@ public class LobbyScreen implements Screen, InputProcessor, TextInputListener {
 			UserSession.game2User2=usersChallengeInProcess[3];			
 			
 			((Game)Gdx.app.getApplicationListener()).setScreen(new GameScreenNewEdition());
-		}
+		}}
+		if(userInProcess3){
 		if (exampleChallengeButton3.getBoundingRectangle().contains(screenX,Gdx.graphics.getHeight() - screenY)) {
 			exampleChallengeButton3.setScale(1);
 			
@@ -603,14 +608,16 @@ public class LobbyScreen implements Screen, InputProcessor, TextInputListener {
 			UserSession.game3User2=usersChallengeInProcess[5];
 			
 			((Game)Gdx.app.getApplicationListener()).setScreen(new GameScreenNewEdition());
-		}
+		}}
+		
+		
 		if (NexampleChallengeButton.getBoundingRectangle().contains(screenX,Gdx.graphics.getHeight() - screenY)) {
 			NexampleChallengeButton.setScale(1);
-			/*
+			
 			System.out.println(usersChallengeToMe[0]+ " - " +usersChallengeToMe[1]);
 			System.out.println(usersChallengeToMe[2]+ " - " +usersChallengeToMe[3]);
 			System.out.println(usersChallengeToMe[4]+ " - " +usersChallengeToMe[5]);
-			*/
+			
 			UserSession.game1User1=usersChallengeToMe[0];
 			UserSession.game1User2=usersChallengeToMe[1];
 			

@@ -53,6 +53,9 @@ public class GameScreenNewEdition implements Screen, InputProcessor{
     String resultChallengeTurn="";
     String inProcess="";
     boolean notFileExists=false;
+    
+    int actuOriginX=-1, actuOriginY=-1, actuDestinyX=-1, actuDestinyY=-1;
+    String actuCoords="";
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
     // POR IMPLEMENTAR:
@@ -76,24 +79,31 @@ public class GameScreenNewEdition implements Screen, InputProcessor{
         
       //ver cual es el turno de la partida
         try {
+        	
 			 resultChallengeTurn = sendGet_getChallengeTurn(actualUser1(),actualUser2());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
         
+        //condicion para imponer el turno de blancas o negras, el jugador que reta siempre es blancas,
+        if(resultChallengeTurn.equals(actualUser1()))turnPlayer=false;
+        else turnPlayer=true;
+        
+        //cargo el tablero que tengo guardado en la memoria del movil
         load();
     
+        //si no tengo ningun tablero guardado en la memoria del movil, inicio el tablero  
 		if (notFileExists) {
-			// cambiar esto por la carga de una partida guardada, si no, dejarlo
 			for (int i = 0; i < 8; i++) {
 				for (int j = 0; j < 8; j++) {
 					chessPosition[i][j] = 0;
 				}
 			}
 		}
+
+
 		
-        // tengo que actualizar la juagada 
-		//if(resultChallengeTurn.equals(UserSession.User)){		}
+		
 		
         initializeBoard();
         spritesBlack();
@@ -105,6 +115,25 @@ public class GameScreenNewEdition implements Screen, InputProcessor{
 		}else{ 
 			drawChess();
 		}
+		
+		if(resultChallengeTurn.equals(UserSession.User)){		
+	        // tengo que actualizar la juagada si es mi turno (actualizar la jugada que mi oponente me ha mandado)
+			//obtengo las coordenadas
+			  try {
+					 actuCoords = sendGet_getPlay(actualUser1(),actualUser2());
+					 
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			  
+			  getActuCoords(actuCoords);
+			  if(actuOriginX!=-1){
+			  int fichaMoved=chessPosition[actuOriginX][actuOriginY];
+			  chessPosition[actuOriginX][actuOriginY]=0;
+			  chessPosition[actuDestinyX][actuDestinyY]=fichaMoved;
+			  drawChess();
+			  }
+			}
 		
 		
         tableHighlight = new Sprite(new Texture("highlight.png"));
@@ -128,8 +157,32 @@ public class GameScreenNewEdition implements Screen, InputProcessor{
         sendButton.setPosition(Gdx.graphics.getWidth()/2-sendButton.getWidth()/2, (Gdx.graphics.getHeight()-sizeCell*8) - (Gdx.graphics.getHeight()-sizeCell*8)/2 -sendButton.getHeight()/2 );
 
     }
-    
+    public void getActuCoords(String actuCoords){
+    	String substringUsers = "";
+		int x;
+		
+			x = actuCoords.indexOf("*");
+			if (x != -1) {
+				actuOriginX = Integer.parseInt(actuCoords.substring(0,x));
+				substringUsers = actuCoords.substring(x + 1);
+			}
+			x = substringUsers.indexOf("*");
+			if (x != -1) {
+				actuOriginY = Integer.parseInt(substringUsers.substring(0, x));
+				substringUsers = substringUsers.substring(x + 1);
+			}
+			x = substringUsers.indexOf("*");
+			if (x != -1) {
+				actuDestinyX=Integer.parseInt(substringUsers.substring(0, x));
+				substringUsers = substringUsers.substring(x + 1);
+			}
+			x = substringUsers.indexOf("*");
+			if (x != -1) {
+				actuDestinyY=Integer.parseInt(substringUsers.substring(0, x));
+			}
+    }
     public String actualUser1(){
+    	
     	if(UserSession.game1User1!=null || UserSession.game1User1!="")return UserSession.game1User1;
 		//UserSession.game1User2="";
 		if(UserSession.game2User1!=null || UserSession.game2User1!="")return UserSession.game2User1;
@@ -1814,7 +1867,11 @@ public class GameScreenNewEdition implements Screen, InputProcessor{
     
 	private void save() {
 		UserSession save;
-		FileHandle file = Gdx.files.local("bin/" + actualUser1() + "vs"	+ actualUser2());
+		FileHandle file;
+		if(actualUser1().equals(UserSession.User))
+			file = Gdx.files.local("bin/" + actualUser1() + "vs"	+ actualUser2());
+		else
+			file = Gdx.files.local("bin/" + actualUser2() + "vs"	+ actualUser1());
 		if (file.exists()) {
 			Json json = new Json();
 			save = json.fromJson(UserSession.class, file);
@@ -1828,7 +1885,14 @@ public class GameScreenNewEdition implements Screen, InputProcessor{
 
 	private void load() {
 		UserSession load;
-		FileHandle file = Gdx.files.local("bin/" + actualUser1() + "vs"	+ actualUser2());
+		FileHandle file;
+		System.out.println(actualUser1()+" - "+UserSession.User);
+		
+		if(actualUser1().equals(UserSession.User))
+			file = Gdx.files.local("bin/" + actualUser1() + "vs"	+ actualUser2());
+		else
+			file = Gdx.files.local("bin/" + actualUser2() + "vs"	+ actualUser1());
+
 		if (file.exists()) {
 			Json json = new Json();
 			load = json.fromJson(UserSession.class, file);
@@ -1859,6 +1923,16 @@ public class GameScreenNewEdition implements Screen, InputProcessor{
     
     private String sendGet_getChallengeTurn(String user1, String user2) throws Exception {
 		String url = "http://84.123.125.224/chesstime/getChallengeTurn.php?user1="+user1+"&user2="+user2;
+		String response="";
+		URL obj = new URL(url);
+		HttpURLConnection con = (HttpURLConnection) obj.openConnection(); 
+		BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+		response = in.readLine();
+		in.close();
+		return response;
+	}
+    private String sendGet_getPlay(String user1, String user2) throws Exception {
+		String url = "http://84.123.125.224/chesstime/getPlay.php?user1="+user1+"&user2="+user2;
 		String response="";
 		URL obj = new URL(url);
 		HttpURLConnection con = (HttpURLConnection) obj.openConnection(); 
