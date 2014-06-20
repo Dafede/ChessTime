@@ -5,11 +5,12 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.TextInputListener;
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
@@ -39,45 +40,37 @@ public class LobbyScreen implements Screen, InputProcessor, TextInputListener {
 	
 	String usersChallengedMe="";
 	
-	Sprite exampleChallenge;
-	Sprite exampleChallengeButton;
+	Sprite exampleChallenge, exampleChallengeButton;
 	BitmapFont exampleChallengeText;
 	
-	Sprite exampleChallenge2;
-	Sprite exampleChallengeButton2;
+	Sprite exampleChallenge2, exampleChallengeButton2;
 	BitmapFont exampleChallengeText2;
 	
-	Sprite exampleChallenge3;
-	Sprite exampleChallengeButton3;
+	Sprite exampleChallenge3, exampleChallengeButton3;
 	BitmapFont exampleChallengeText3;
 	
-	Sprite NexampleChallenge;
-	Sprite NexampleChallengeButton;
+	Sprite NexampleChallenge, NexampleChallengeButton;
 	BitmapFont NexampleChallengeText;
 	
-	Sprite NexampleChallenge2;
-	Sprite NexampleChallengeButton2;
+	Sprite NexampleChallenge2, NexampleChallengeButton2;
 	BitmapFont NexampleChallengeText2;
 	
-	Sprite NexampleChallenge3;
-	Sprite NexampleChallengeButton3;
+	Sprite NexampleChallenge3, NexampleChallengeButton3;
 	BitmapFont NexampleChallengeText3;
 	
-	Sprite exampleDeleteButton;
-	Sprite exampleDeleteButton2;
-	Sprite exampleDeleteButton3;
+	Sprite exampleDeleteButton, exampleDeleteButton2, exampleDeleteButton3;
 	
-	Sprite NexampleDeleteButton;
-	Sprite NexampleDeleteButton2;
-	Sprite NexampleDeleteButton3;
+	Sprite NexampleDeleteButton, NexampleDeleteButton2, NexampleDeleteButton3;
 	
+	BitmapFont turnText,turnText2,turnText3,NturnText,NturnText2,NturnText3;
+	BitmapFont nameSession;
+	
+
 	boolean exampleChallengeBool=false;
 	
 	Sprite refreshButton;
 	
-	Sprite exampleProcess;
-	Sprite exampleProcess2;
-	Sprite exampleProcess3;
+	Sprite exampleProcess, exampleProcess2, exampleProcess3;
 	
 	String usersGamesInProcess="";
 	
@@ -90,31 +83,26 @@ public class LobbyScreen implements Screen, InputProcessor, TextInputListener {
 	boolean userInProcess2=false;
 	boolean userInProcess3=false;
 	
-	String textUserInProgress1="";
-	String textUserInProgress2="";
-	String textUserInProgress3="";
+	String textUserInProgress1="", textUserInProgress2="", textUserInProgress3="";
 	
 	boolean userInProcessToMe1=false;
 	boolean userInProcessToMe2=false;
 	boolean userInProcessToMe3=false;
 	
-	String textUserInProgressToMe1="";
-	String textUserInProgressToMe2="";
-	String textUserInProgressToMe3="";
+	String textUserInProgressToMe1="", textUserInProgressToMe2="", textUserInProgressToMe3="";
 	
 	boolean breakifs2=true;
 	boolean breakifs3=true;
 	
-	
 	float E1X, E1Y, E1XB, E1YB,E2X, E2Y, E2XB, E2YB,E3X, E3Y, E3XB, E3YB,E1XDB,E1YDB,E2XDB,E2YDB,E3XDB,E3YDB;
 	
-	//contiene los jugadores de las 3 partidas posibles en proceso
-	// [0]vs[1]  [2]vs[3] ... siendo [user1] vs [user2]
+	// contiene los jugadores de las 3 partidas posibles en proceso
+	// [0]vs[1] [2]vs[3] ... siendo [user1] vs [user2]
 	String[] usersChallengeInProcess = new String[6];
-	
-	//contiene los jugadores de  3  o menos partidas posibles que nos han retado
-		// [0]vs[1]  [2]vs[3] ... siendo [user1] vs [user2]
-		String[] usersChallengeToMe = new String[6];
+
+	// contiene los jugadores de 3 o menos partidas posibles que nos han retado
+	// [0]vs[1] [2]vs[3] ... siendo [user1] vs [user2]
+	String[] usersChallengeToMe = new String[6];
 	
 	@Override
 	public void show() {
@@ -122,6 +110,10 @@ public class LobbyScreen implements Screen, InputProcessor, TextInputListener {
 		batch = new SpriteBatch();
 
 		Gdx.input.setInputProcessor(this);
+		
+		nameSession=new BitmapFont();
+		nameSession.setColor(Color.ORANGE);
+		nameSession.setScale(0.9f);
 
 		backgroundTexture = new Texture("menuBackground.png");
 
@@ -215,8 +207,31 @@ public class LobbyScreen implements Screen, InputProcessor, TextInputListener {
 		NexampleChallengeText3 = new BitmapFont();
 		NexampleChallengeText3.setColor(Color.WHITE);
 		NexampleChallengeText3.setScale(0.9f);
+		
+		turnText = new BitmapFont();
+		turnText.setScale(0.8f);
+		turnText2 = new BitmapFont();
+		turnText2.setScale(0.8f);
+		turnText3 = new BitmapFont();
+		turnText3.setScale(0.8f);
+		NturnText = new BitmapFont();
+		NturnText.setScale(0.8f);
+		NturnText2 = new BitmapFont();
+		NturnText2.setScale(0.8f);
+		NturnText3 = new BitmapFont();
+		NturnText3.setScale(0.8f);
 
 	}	
+	
+	public String getTurnOfThisGame(String u1,String u2){
+		String resultChallengeTurn="";
+		try {
+			 resultChallengeTurn = sendGet_getChallengeTurn(u1,u2);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return resultChallengeTurn;
+	}
 	
 	@Override
 	public void render(float delta) {
@@ -226,6 +241,9 @@ public class LobbyScreen implements Screen, InputProcessor, TextInputListener {
 
 		batch.begin();	
 		batch.draw(backgroundTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		
+		nameSession.draw(batch,UserSession.User,Gdx.graphics.getWidth()- nameSession.getBounds(UserSession.User).width - 10,Gdx.graphics.getHeight() - nameSession.getBounds(UserSession.User).height - 10);
+		
 		textInputSearch.draw(batch);
 		challengePlayer.draw(batch);
 		searchLabel.draw(batch, "Challenging Users", Gdx.graphics.getWidth() / 15, Gdx.graphics.getHeight() - Gdx.graphics.getHeight() / 20);
@@ -245,6 +263,8 @@ public class LobbyScreen implements Screen, InputProcessor, TextInputListener {
 			exampleChallengeText.draw(batch,textUserInProgress1,exampleChallenge.getX()+10,exampleChallenge.getY()+exampleChallenge.getHeight()/2 +5);
 			exampleChallengeButton.draw(batch);
 			exampleDeleteButton.draw(batch);
+			turnText.draw(batch, "Turn: "+getTurnOfThisGame(usersChallengeInProcess[0],usersChallengeInProcess[1]), exampleChallenge.getX()+10,exampleChallenge.getY()+exampleChallenge.getHeight()/2 -17);
+			
 		}
 		if(userInProcess2){
 			exampleChallenge2.draw(batch);
@@ -252,6 +272,7 @@ public class LobbyScreen implements Screen, InputProcessor, TextInputListener {
 			exampleChallengeText2.draw(batch,textUserInProgress2,exampleChallenge2.getX()+10,exampleChallenge2.getY()+exampleChallenge2.getHeight()/2 +5);
 			exampleChallengeButton2.draw(batch);
 			exampleDeleteButton2.draw(batch);
+			turnText2.draw(batch, "Turn: "+getTurnOfThisGame(usersChallengeInProcess[2],usersChallengeInProcess[3]), exampleChallenge2.getX()+10,exampleChallenge2.getY()+exampleChallenge2.getHeight()/2 -17);
 		}
 		if(userInProcess3){
 			exampleChallenge3.draw(batch);
@@ -259,6 +280,7 @@ public class LobbyScreen implements Screen, InputProcessor, TextInputListener {
 			exampleChallengeText3.draw(batch,textUserInProgress3,exampleChallenge3.getX()+10,exampleChallenge3.getY()+exampleChallenge3.getHeight()/2 +5);
 			exampleChallengeButton3.draw(batch);
 			exampleDeleteButton3.draw(batch);
+			turnText3.draw(batch, "Turn: "+getTurnOfThisGame(usersChallengeInProcess[4],usersChallengeInProcess[5]), exampleChallenge3.getX()+10,exampleChallenge3.getY()+exampleChallenge3.getHeight()/2 -17);
 		}
 		
 		//////aki dibujamos los retos que no estan en proceso, es decir los que me han mandado
@@ -275,6 +297,7 @@ public class LobbyScreen implements Screen, InputProcessor, TextInputListener {
 				NexampleChallengeText.draw(batch,textUserInProgressToMe1,NexampleChallenge.getX()+10,NexampleChallenge.getY()+NexampleChallenge.getHeight()/2 +5);
 				NexampleChallengeButton.draw(batch);
 				NexampleDeleteButton.draw(batch);
+				NturnText.draw(batch, "Turn: "+getTurnOfThisGame(usersChallengeToMe[0],usersChallengeToMe[1]), NexampleChallenge.getX()+10,NexampleChallenge.getY()+NexampleChallenge.getHeight()/2 +5-17);
 			}
 			if(userInProcessToMe2){
 				NexampleChallenge2.setPosition(E2X,E2Y);
@@ -284,6 +307,7 @@ public class LobbyScreen implements Screen, InputProcessor, TextInputListener {
 				NexampleChallengeText2.draw(batch,textUserInProgressToMe2,NexampleChallenge2.getX()+10,NexampleChallenge2.getY()+NexampleChallenge2.getHeight()/2 +5);
 				NexampleChallengeButton2.draw(batch);
 				NexampleDeleteButton2.draw(batch);
+				NturnText2.draw(batch, "Turn: "+getTurnOfThisGame(usersChallengeToMe[2],usersChallengeToMe[3]), NexampleChallenge2.getX()+10,NexampleChallenge2.getY()+NexampleChallenge2.getHeight()/2 +5-17);
 			}
 			if(userInProcessToMe3){
 				NexampleChallenge3.setPosition(E3X,E3Y);
@@ -293,6 +317,7 @@ public class LobbyScreen implements Screen, InputProcessor, TextInputListener {
 				NexampleChallengeText3.draw(batch,textUserInProgressToMe3,NexampleChallenge3.getX()+10,NexampleChallenge3.getY()+NexampleChallenge3.getHeight()/2 +5);
 				NexampleChallengeButton3.draw(batch);
 				NexampleDeleteButton3.draw(batch);
+				NturnText3.draw(batch, "Turn: "+getTurnOfThisGame(usersChallengeToMe[4],usersChallengeToMe[5]), NexampleChallenge3.getX()+10,NexampleChallenge3.getY()+NexampleChallenge3.getHeight()/2 +5-17);
 			}
 		}
 		if(!userInProcess2 && breakifs2){
@@ -305,6 +330,7 @@ public class LobbyScreen implements Screen, InputProcessor, TextInputListener {
 				NexampleChallengeText.draw(batch,textUserInProgressToMe1,NexampleChallenge.getX()+10,NexampleChallenge.getY()+NexampleChallenge.getHeight()/2 +5);
 				NexampleChallengeButton.draw(batch);		
 				NexampleDeleteButton.draw(batch);
+				NturnText.draw(batch, "Turn: "+getTurnOfThisGame(usersChallengeToMe[0],usersChallengeToMe[1]), NexampleChallenge.getX()+10,NexampleChallenge.getY()+NexampleChallenge.getHeight()/2 +5-17);
 			}
 			if(userInProcessToMe2){
 				NexampleChallenge2.setPosition(E3X, E3Y);
@@ -314,6 +340,7 @@ public class LobbyScreen implements Screen, InputProcessor, TextInputListener {
 				NexampleChallengeText2.draw(batch,textUserInProgressToMe2,NexampleChallenge2.getX()+10,NexampleChallenge2.getY()+NexampleChallenge2.getHeight()/2 +5);
 				NexampleChallengeButton2.draw(batch);
 				NexampleDeleteButton2.draw(batch);
+				NturnText2.draw(batch, "Turn: "+getTurnOfThisGame(usersChallengeToMe[2],usersChallengeToMe[3]), NexampleChallenge2.getX()+10,NexampleChallenge2.getY()+NexampleChallenge2.getHeight()/2 +5-17);
 			}
 		}
 		if(!userInProcess3 && breakifs3){
@@ -325,6 +352,7 @@ public class LobbyScreen implements Screen, InputProcessor, TextInputListener {
 				NexampleChallengeText.draw(batch,textUserInProgressToMe1,NexampleChallenge.getX()+10,NexampleChallenge.getY()+NexampleChallenge.getHeight()/2 +5);
 				NexampleChallengeButton.draw(batch);
 				NexampleDeleteButton.draw(batch);
+				NturnText.draw(batch, "Turn: "+getTurnOfThisGame(usersChallengeToMe[0],usersChallengeToMe[1]), NexampleChallenge.getX()+10,NexampleChallenge.getY()+NexampleChallenge.getHeight()/2 +5 -17);
 			}
 		}
 		
@@ -337,9 +365,6 @@ public class LobbyScreen implements Screen, InputProcessor, TextInputListener {
 		batch.end();
 		
 	}
-
-
-	
 	public void loadGames() {
 		//Primero cargaremos las partidas en curso, si no, las partidas que estan por comenzar.
 		try {
@@ -496,7 +521,7 @@ public class LobbyScreen implements Screen, InputProcessor, TextInputListener {
 				// "mirar mas  arriba el metodo setBreakIfs();")
 				setBreakIfs();
 			}
-		}, 0.2f);
+		}, 0.05f);
 		}
 	@Override
 	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
@@ -594,11 +619,7 @@ public class LobbyScreen implements Screen, InputProcessor, TextInputListener {
 		if(userInProcess2){
 		if (exampleChallengeButton2.getBoundingRectangle().contains(screenX,Gdx.graphics.getHeight() - screenY)) {
 			exampleChallengeButton2.setScale(1);
-/*
-			System.out.println(usersChallengeInProcess[0]+ " - " +usersChallengeInProcess[1]);
-			System.out.println(usersChallengeInProcess[2]+ " - " +usersChallengeInProcess[3]);
-			System.out.println(usersChallengeInProcess[4]+ " - " +usersChallengeInProcess[5]);
-			*/
+
 			UserSession.game2User1=usersChallengeInProcess[2];
 			UserSession.game2User2=usersChallengeInProcess[3];			
 			
@@ -617,11 +638,7 @@ public class LobbyScreen implements Screen, InputProcessor, TextInputListener {
 		
 		if (NexampleChallengeButton.getBoundingRectangle().contains(screenX,Gdx.graphics.getHeight() - screenY)) {
 			NexampleChallengeButton.setScale(1);
-			/*
-			System.out.println(usersChallengeToMe[0]+ " - " +usersChallengeToMe[1]);
-			System.out.println(usersChallengeToMe[2]+ " - " +usersChallengeToMe[3]);
-			System.out.println(usersChallengeToMe[4]+ " - " +usersChallengeToMe[5]);
-			*/
+
 			UserSession.game1User1=usersChallengeToMe[0];
 			UserSession.game1User2=usersChallengeToMe[1];
 			
@@ -648,101 +665,99 @@ public class LobbyScreen implements Screen, InputProcessor, TextInputListener {
 		// DELETE BUTTONS
 		if (exampleDeleteButton.getBoundingRectangle().contains(screenX,Gdx.graphics.getHeight() - screenY)) {
 			exampleDeleteButton.setScale(1);
+			deleteFile1(0,1);
 			try {
 				sendGet_deleteChallenge(usersChallengeInProcess[0],usersChallengeInProcess[1]);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			Timer.schedule(new Task() {
-				@Override
-				public void run() {
-					
-					refresh();
-				}
-			}, 2);
+			timerRefresh();
 		}
 		if (exampleDeleteButton2.getBoundingRectangle().contains(screenX,Gdx.graphics.getHeight() - screenY)) {
 			exampleDeleteButton2.setScale(1);
+			deleteFile1(2,3);
 			try {
 				sendGet_deleteChallenge(usersChallengeInProcess[2],usersChallengeInProcess[3]);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			Timer.schedule(new Task() {
-				@Override
-				public void run() {
-					
-					refresh();
-				}
-			}, 2);
+			timerRefresh();
 		}
 		if (exampleDeleteButton3.getBoundingRectangle().contains(screenX,Gdx.graphics.getHeight() - screenY)) {
 			exampleDeleteButton3.setScale(1);
+			deleteFile1(4,5);
 			try {
 				sendGet_deleteChallenge(usersChallengeInProcess[4],usersChallengeInProcess[5]);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			Timer.schedule(new Task() {
-				@Override
-				public void run() {
-					
-					refresh();
-				}
-			}, 2);
+			timerRefresh();
 		}
 		if (NexampleDeleteButton.getBoundingRectangle().contains(screenX,Gdx.graphics.getHeight() - screenY)) {
-			NexampleDeleteButton.setScale(1);		
+			NexampleDeleteButton.setScale(1);	
+			deleteFile2(0,1);
 			try {
 				sendGet_deleteChallenge(usersChallengeToMe[0],usersChallengeToMe[1]);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			Timer.schedule(new Task() {
-				@Override
-				public void run() {
-					
-					refresh();
-				}
-			}, 2);
+			timerRefresh();
 		}
 		if (NexampleDeleteButton2.getBoundingRectangle().contains(screenX,Gdx.graphics.getHeight() - screenY)) {
 			NexampleDeleteButton2.setScale(1);
+			deleteFile2(2,3);
 			try {
 				sendGet_deleteChallenge(usersChallengeToMe[2],usersChallengeToMe[3]);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			Timer.schedule(new Task() {
-				@Override
-				public void run() {
-					
-					refresh();
-				}
-			}, 2);
+			timerRefresh();
 		}
 		if (NexampleDeleteButton3.getBoundingRectangle().contains(screenX,Gdx.graphics.getHeight() - screenY)) {
 			NexampleDeleteButton3.setScale(1);
+			deleteFile2(4,5);
 			try {
 				sendGet_deleteChallenge(usersChallengeToMe[4],usersChallengeToMe[5]);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			Timer.schedule(new Task() {
-				@Override
-				public void run() {
-					
-					refresh();
-				}
-			}, 2);
+			timerRefresh();
 		}	
 
 		return false;
 	}
-
+	public void timerRefresh(){
+		Timer.schedule(new Task() {
+			@Override
+			public void run() {
+				
+				refresh();
+			}
+		}, 0.05f);
+	}
+	public void deleteFile1(int u1, int u2){
+		FileHandle file;			
+		if(usersChallengeInProcess[u1].equals(UserSession.User))
+			file = Gdx.files.local("bin/" + usersChallengeToMe[u1] + "vs"	+ usersChallengeToMe[u2]);
+		else
+			file = Gdx.files.local("bin/" + usersChallengeToMe[u2] + "vs"	+ usersChallengeToMe[u1]);
+		if (file.exists()) {
+			file.delete();
+		}
+	}
+	public void deleteFile2(int u1, int u2){
+		FileHandle file;			
+		if(usersChallengeInProcess[u1].equals(UserSession.User))
+			file = Gdx.files.local("bin/" + usersChallengeInProcess[u1] + "vs"	+ usersChallengeInProcess[u2]);
+		else
+			file = Gdx.files.local("bin/" + usersChallengeInProcess[u2] + "vs"	+ usersChallengeInProcess[u1]);
+		if (file.exists()) {
+			file.delete();
+		}
+	}
 	////////////////// START GET REQUESTS ////////////////////////////////////
 	private String sendGet_isUserExists(String username) throws Exception {
-		String url = "http://84.123.125.224/chesstime/isUserExists.php?username="+username;
+		String url = "http://chesstime.net46.net/isUserExists.php?username="+username;
 		String response="";
 		URL obj = new URL(url);
 		HttpURLConnection con = (HttpURLConnection) obj.openConnection(); 
@@ -752,7 +767,7 @@ public class LobbyScreen implements Screen, InputProcessor, TextInputListener {
 		return response;
 	}
 	private String sendGet_getChallenges(String username) throws Exception {
-		String url = "http://84.123.125.224/chesstime/getChallenges.php?username="+username;
+		String url = "http://chesstime.net46.net/getChallenges.php?username="+username;
 		String response="";
 		URL obj = new URL(url);
 		HttpURLConnection con = (HttpURLConnection) obj.openConnection(); 
@@ -762,7 +777,7 @@ public class LobbyScreen implements Screen, InputProcessor, TextInputListener {
 		return response;
 	}
 	private String sendGet_getChallengesInProcess(String username)throws Exception {
-		String url = "http://84.123.125.224/chesstime/getChallengesInProcess.php?username="+ username;		
+		String url = "http://chesstime.net46.net/getChallengesInProcess.php?username="+ username;		
 		String response = "";
 		URL obj = new URL(url);
 		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
@@ -772,7 +787,7 @@ public class LobbyScreen implements Screen, InputProcessor, TextInputListener {
 		return response;
 	}
 	private String sendGet_challengeUser(String me, String other, int originX,int originY, int destinyX, int destinyY) throws Exception {
-		String url = "http://84.123.125.224/chesstime/challengeUser.php?me="+ me + "&other=" + other + "&originX=" + originX + "&originY="+ originY + "&destinyX=" + destinyX + "&destinyY=" + destinyY;
+		String url = "http://chesstime.net46.net/challengeUser.php?me="+ me + "&other=" + other + "&originX=" + originX + "&originY="+ originY + "&destinyX=" + destinyX + "&destinyY=" + destinyY;
 		String response = "";
 		URL obj = new URL(url);
 		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
@@ -782,7 +797,7 @@ public class LobbyScreen implements Screen, InputProcessor, TextInputListener {
 		return response;
 	}
 	private String sendGet_deleteChallenge(String user1, String user2) throws Exception {
-		String url = "http://84.123.125.224/chesstime/deleteChallenge.php?user1="+ user1 + "&user2=" + user2;
+		String url = "http://chesstime.net46.net/deleteChallenge.php?user1="+ user1 + "&user2=" + user2;
 		String response = "";
 		URL obj = new URL(url);
 		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
@@ -791,6 +806,16 @@ public class LobbyScreen implements Screen, InputProcessor, TextInputListener {
 		in.close();
 		return response;
 	}
+	private String sendGet_getChallengeTurn(String user1, String user2) throws Exception {
+			String url = "http://chesstime.net46.net/getChallengeTurn.php?user1="+user1+"&user2="+user2;
+			String response="";
+			URL obj = new URL(url);
+			HttpURLConnection con = (HttpURLConnection) obj.openConnection(); 
+			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+			response = in.readLine();
+			in.close();
+			return response;
+		}
 	////////////////// END  GET REQUESTS /////////////////////////////////////
 
 	public void parseUsersGameInProcess1(String usersChallengedMe){		
@@ -831,7 +856,6 @@ public class LobbyScreen implements Screen, InputProcessor, TextInputListener {
 			}
 		}
 	}
-	
 	public void parseUsersGameInProcess(String usersGamesInProcess) {
 
 		String substringUsers = "";

@@ -22,7 +22,7 @@ public class GameScreenNewEdition implements Screen, InputProcessor{
     
     SpriteBatch batch;
 	private Texture backgroundTexture;
-    //private int W=Gdx.graphics.getWidth();
+    private int W=Gdx.graphics.getWidth();
     private int H=Gdx.graphics.getHeight();
     private int sizeCell = Gdx.graphics.getWidth()/8;
     private int reduxPiece = 10; //Esta es la unica variable que se introduce a mano, habria que calcularla en proporcion, segun el tipo de dispositivo
@@ -56,6 +56,8 @@ public class GameScreenNewEdition implements Screen, InputProcessor{
     
     int actuOriginX=-1, actuOriginY=-1, actuDestinyX=-1, actuDestinyY=-1;
     String actuCoords="";
+    
+    Sprite backButton;
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
     // POR IMPLEMENTAR:
@@ -80,22 +82,11 @@ public class GameScreenNewEdition implements Screen, InputProcessor{
       //ver cual es el turno de la partida
         try {
 			 resultChallengeTurn = sendGet_getChallengeTurn(actualUser1(),actualUser2());
-			 System.out.println(actualUser1() + " ^ " +resultChallengeTurn);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
         
         //condicion para imponer el turno de blancas o negras, el jugador que reta siempre es blancas,
-        System.out.println("game1User1: "+UserSession.game1User1);
-        System.out.println("game1User2: "+UserSession.game1User2);
-        System.out.println("game2User1: "+UserSession.game2User1);
-        System.out.println("game2User2: "+UserSession.game2User2);
-        System.out.println("game3User1: "+UserSession.game3User1);
-        System.out.println("game3User2: "+UserSession.game3User2);
-        
-        System.out.println("AKI");
-        System.out.println(actualUser1() + " - " +resultChallengeTurn);
-        System.out.println("AKA");
         if(resultChallengeTurn.equals(actualUser1()))turnPlayer=false;
         else turnPlayer=true;
         
@@ -145,6 +136,10 @@ public class GameScreenNewEdition implements Screen, InputProcessor{
         tableHighlight.setSize(sizeCell,sizeCell);
         tableHighlight.setPosition(getPositionX(0), getPositionY(0));
         tableHighlight.setAlpha(0);
+        
+        backButton = new Sprite(new Texture("backButton.png"));
+        backButton.setSize(backButton.getWidth()/1.5f, backButton.getHeight()/1.5f);
+        backButton.setPosition(W-backButton.getWidth()-10, 10);
         
         for(int i=0;i<8;i++){
             for(int j=0;j<8;j++){
@@ -218,6 +213,8 @@ public class GameScreenNewEdition implements Screen, InputProcessor{
                 whereGoChess[i][j].draw(batch);
             }
         }
+        
+        backButton.draw(batch);
         sendButton.draw(batch);
         batch.end();
     	
@@ -706,16 +703,19 @@ public class GameScreenNewEdition implements Screen, InputProcessor{
 		// que haya tocado una pieza
 		// 2
 		// que haya tocad una posicion a la que mover una pieza
-
+    	if (backButton.getBoundingRectangle().contains(screenX,	Gdx.graphics.getHeight() - screenY)) {
+			backButton.setScale(1.1f);
+		}
 		if (resultChallengeTurn.equals(UserSession.User)) {
 			if (!whoPieceTouched(screenX, screenY)
 					&& isActivewhereGoChessBool())
 				whoMoveTouched(screenX, screenY);
 
-			if (sendButton.getBoundingRectangle().contains(screenX,
-					Gdx.graphics.getHeight() - screenY)) {
+			if (sendButton.getBoundingRectangle().contains(screenX,	Gdx.graphics.getHeight() - screenY)) {
 				sendButton.setScale(1.1f);
 			}
+			
+			
 
 		}
 		return false;
@@ -1422,375 +1422,150 @@ public class GameScreenNewEdition implements Screen, InputProcessor{
         if(turnPlayer==true){
             if ( pawnB1.getBoundingRectangle().contains(x, Gdx.graphics.getHeight() - y) )
             {
-                resetWhereGoHighlightAndBool();
-                resetPieceHighlight();
-                if(numberPieceActive!=17){
-                    numberPieceActive=17;
-                    setHighlightToSprite(pawnB1,17);
-                    setHighlightwhereCanGo(17);
-                    return true;
-                }
+            	if(touchPieceSetting(17,pawnB1))return true;
             }
             if ( pawnB2.getBoundingRectangle().contains(x, Gdx.graphics.getHeight() - y) )
             {
-                resetWhereGoHighlightAndBool();
-                resetPieceHighlight();
-                if(numberPieceActive!=18){
-                    numberPieceActive=18;
-                    setHighlightToSprite(pawnB2,18);
-                    setHighlightwhereCanGo(18);
-                    return true;
-                }
+            	if(touchPieceSetting(18,pawnB2))return true;
             }
             if ( pawnB3.getBoundingRectangle().contains(x, Gdx.graphics.getHeight() - y) )
             {
-                resetWhereGoHighlightAndBool();
-                resetPieceHighlight();
-                if(numberPieceActive!=19){
-                    numberPieceActive=19;
-                    setHighlightToSprite(pawnB3,19);
-                    setHighlightwhereCanGo(19);
-                    return true;
-                }
+            	if(touchPieceSetting(19,pawnB3))return true;
             }
             if ( pawnB4.getBoundingRectangle().contains(x, Gdx.graphics.getHeight() - y) )
             {
-                resetWhereGoHighlightAndBool();
-                resetPieceHighlight();
-                if(numberPieceActive!=20){
-                    numberPieceActive=20;
-                    setHighlightToSprite(pawnB4,20);
-                    setHighlightwhereCanGo(20);
-                    return true;
-                }
+            	if(touchPieceSetting(20,pawnB4))return true;
             }
             if ( pawnB5.getBoundingRectangle().contains(x, Gdx.graphics.getHeight() - y) )
             {
-                resetWhereGoHighlightAndBool();
-                resetPieceHighlight();
-                if(numberPieceActive!=21){
-                    numberPieceActive=21;
-                    setHighlightToSprite(pawnB5,21);
-                    setHighlightwhereCanGo(21);
-                    return true;
-                }
+            	if(touchPieceSetting(21,pawnB5))return true;
             }
             if ( pawnB6.getBoundingRectangle().contains(x, Gdx.graphics.getHeight() - y) )
             {
-                resetWhereGoHighlightAndBool();
-                resetPieceHighlight();
-                if(numberPieceActive!=22){
-                    numberPieceActive=22;
-                    setHighlightToSprite(pawnB6,22);
-                    setHighlightwhereCanGo(22);
-                    return true;
-                }
+            	if(touchPieceSetting(22,pawnB6))return true;
             }
             if ( pawnB7.getBoundingRectangle().contains(x, Gdx.graphics.getHeight() - y) )
             {
-                resetWhereGoHighlightAndBool();
-                resetPieceHighlight();
-                if(numberPieceActive!=23){
-                    numberPieceActive=23;
-                    setHighlightToSprite(pawnB7,23);
-                    setHighlightwhereCanGo(23);
-                    return true;
-                }
+            	if(touchPieceSetting(23,pawnB7))return true;
             }
             if ( pawnB8.getBoundingRectangle().contains(x, Gdx.graphics.getHeight() - y) )
             {
-                resetWhereGoHighlightAndBool();
-                resetPieceHighlight();
-                if(numberPieceActive!=24){
-                    numberPieceActive=24;
-                    setHighlightToSprite(pawnB8,24);
-                    setHighlightwhereCanGo(24);
-                    return true;
-                }
+            	if(touchPieceSetting(24,pawnB8))return true;
             }
-            
             if(rookB1.getBoundingRectangle().contains(x,Gdx.graphics.getHeight() - y))
             {
-                resetWhereGoHighlightAndBool();
-                resetPieceHighlight();
-                if(numberPieceActive!=25){
-                    numberPieceActive=25;
-                    setHighlightToSprite(rookB1,25);
-                    setHighlightwhereCanGo(25);
-                    return true;
-                }
+            	if(touchPieceSetting(25,rookB1))return true;
             }
             if(rookB2.getBoundingRectangle().contains(x,Gdx.graphics.getHeight() - y))
             {
-                resetWhereGoHighlightAndBool();
-                resetPieceHighlight();
-                if(numberPieceActive!=26){
-                    numberPieceActive=26;
-                    setHighlightToSprite(rookB2,26);
-                    setHighlightwhereCanGo(26);
-                    return true;
-                }
+            	if(touchPieceSetting(26,rookB2))return true;
             }
             if(knightB1.getBoundingRectangle().contains(x,Gdx.graphics.getHeight() - y))
             {
-                resetWhereGoHighlightAndBool();
-                resetPieceHighlight();
-                if(numberPieceActive!=27){
-                    numberPieceActive=27;
-                    setHighlightToSprite(knightB1,27);
-                    setHighlightwhereCanGo(27);
-                    return true;
-                }
+            	if(touchPieceSetting(27,knightB1))return true;
             }
             if(knightB2.getBoundingRectangle().contains(x,Gdx.graphics.getHeight() - y))
             {
-                resetWhereGoHighlightAndBool();
-                resetPieceHighlight();
-                if(numberPieceActive!=28){
-                    numberPieceActive=28;
-                    setHighlightToSprite(knightB2,28);
-                    setHighlightwhereCanGo(28);
-                    return true;
-                }
+            	if(touchPieceSetting(28,knightB2))return true;
             }
             if(bishopB1.getBoundingRectangle().contains(x,Gdx.graphics.getHeight() - y))
             {
-                resetWhereGoHighlightAndBool();
-                resetPieceHighlight();
-                if(numberPieceActive!=29){
-                    numberPieceActive=29;
-                    setHighlightToSprite(bishopB1,29);
-                    setHighlightwhereCanGo(29);
-                    return true;
-                }
+            	if(touchPieceSetting(29,bishopB1))return true;
             }
-            
             if(bishopB2.getBoundingRectangle().contains(x,Gdx.graphics.getHeight() - y))
             {
-                resetWhereGoHighlightAndBool();
-                resetPieceHighlight();
-                if(numberPieceActive!=30){
-                    numberPieceActive=30;
-                    setHighlightToSprite(bishopB2,30);
-                    setHighlightwhereCanGo(30);
-                    return true;
-                }
+            	if(touchPieceSetting(30,bishopB2))return true;
             }
             if(queenB.getBoundingRectangle().contains(x,Gdx.graphics.getHeight() - y))
             {
-                resetWhereGoHighlightAndBool();
-                resetPieceHighlight();
-                if(numberPieceActive!=31){
-                    numberPieceActive=31;
-                    setHighlightToSprite(queenB,31);
-                    setHighlightwhereCanGo(31);
-                    return true;
-                }
+            	if(touchPieceSetting(31,queenB))return true;
             }
             if(kingB.getBoundingRectangle().contains(x,Gdx.graphics.getHeight() - y))
             {
-                resetWhereGoHighlightAndBool();
-                resetPieceHighlight();
-                if(numberPieceActive!=32){
-                    numberPieceActive=32;
-                    setHighlightToSprite(kingB,32);
-                    setHighlightwhereCanGo(32);
-                    return true;
-                }
+            	if(touchPieceSetting(32,kingB))return true;
             }
-            
-            
         }
-        
         //BLANCAS
         if(turnPlayer==false){
             if ( pawnW1.getBoundingRectangle().contains(x, Gdx.graphics.getHeight() - y) )
             {
-                
-                resetWhereGoHighlightAndBool();
-                
-                resetPieceHighlight();
-                
-                if(numberPieceActive!=1){
-                    
-                    numberPieceActive=1;
-                    
-                    setHighlightToSprite(pawnW1,1);
-                    
-                    setHighlightwhereCanGo(1);
-                    
-                    return true;
-                }
-                
+            	if(touchPieceSetting(1,pawnW1))return true;                
             }
             if ( pawnW2.getBoundingRectangle().contains(x, Gdx.graphics.getHeight() - y) )
             {
-                resetWhereGoHighlightAndBool();
-                resetPieceHighlight();
-                if(numberPieceActive!=2){
-                    numberPieceActive=2;
-                    setHighlightToSprite(pawnW2,2);
-                    setHighlightwhereCanGo(2);
-                    return true;
-                }
+            	if(touchPieceSetting(2,pawnW2))return true;
             }
             if ( pawnW3.getBoundingRectangle().contains(x, Gdx.graphics.getHeight() - y) )
             {
-                resetWhereGoHighlightAndBool();
-                resetPieceHighlight();
-                if(numberPieceActive!=3){
-                    numberPieceActive=3;
-                    setHighlightToSprite(pawnW3,3);
-                    setHighlightwhereCanGo(3);
-                    return true;
-                }
+            	if(touchPieceSetting(3,pawnW3))return true;
             }
             if ( pawnW4.getBoundingRectangle().contains(x, Gdx.graphics.getHeight() - y) )
             {
-                resetWhereGoHighlightAndBool();
-                resetPieceHighlight();
-                if(numberPieceActive!=4){
-                    numberPieceActive=4;
-                    setHighlightToSprite(pawnW4,4);
-                    setHighlightwhereCanGo(4);
-                    return true;
-                }
+            	if(touchPieceSetting(4,pawnW4))return true;
             }
             if ( pawnW5.getBoundingRectangle().contains(x, Gdx.graphics.getHeight() - y) )
             {
-                resetWhereGoHighlightAndBool();
-                resetPieceHighlight();
-                if(numberPieceActive!=5){
-                    numberPieceActive=5;
-                    setHighlightToSprite(pawnW5,5);
-                    setHighlightwhereCanGo(5);
-                    return true;
-                }
+            	if(touchPieceSetting(5,pawnW5))return true;
             }
             if ( pawnW6.getBoundingRectangle().contains(x, Gdx.graphics.getHeight() - y) )
             {
-                resetWhereGoHighlightAndBool();
-                resetPieceHighlight();
-                if(numberPieceActive!=6){
-                    numberPieceActive=6;
-                    setHighlightToSprite(pawnW6,6);
-                    setHighlightwhereCanGo(6);
-                    return true;
-                }
+            	if(touchPieceSetting(6,pawnW6))return true;
             }
             if ( pawnW7.getBoundingRectangle().contains(x, Gdx.graphics.getHeight() - y) )
             {
-                resetWhereGoHighlightAndBool();
-                resetPieceHighlight();
-                if(numberPieceActive!=7){
-                    numberPieceActive=7;
-                    setHighlightToSprite(pawnW7,7);
-                    setHighlightwhereCanGo(7);
-                    return true;
-                }
+            	if(touchPieceSetting(7,pawnW7))return true;
             }
             if ( pawnW8.getBoundingRectangle().contains(x, Gdx.graphics.getHeight() - y) )
             {
-                resetWhereGoHighlightAndBool();
-                resetPieceHighlight();
-                if(numberPieceActive!=8){
-                    numberPieceActive=8;
-                    setHighlightToSprite(pawnW8,8);
-                    setHighlightwhereCanGo(8);
-                    return true;
-                }
+            	if(touchPieceSetting(8,pawnW8))return true;
             }
             if(rookW1.getBoundingRectangle().contains(x,Gdx.graphics.getHeight() - y))
             {
-                resetWhereGoHighlightAndBool();
-                resetPieceHighlight();
-                if(numberPieceActive!=9){
-                    numberPieceActive=9;
-                    setHighlightToSprite(rookB1,9);
-                    setHighlightwhereCanGo(9);
-                    return true;
-                }
+            	if(touchPieceSetting(9,rookW1))return true;
             }
             if(rookW2.getBoundingRectangle().contains(x,Gdx.graphics.getHeight() - y))
             {
-                resetWhereGoHighlightAndBool();
-                resetPieceHighlight();
-                if(numberPieceActive!=10){
-                    numberPieceActive=10;
-                    setHighlightToSprite(rookW2,10);
-                    setHighlightwhereCanGo(10);
-                    
-                    return true;
-                }
+            	if(touchPieceSetting(10,rookW2))return true;
             }
             if(knightW1.getBoundingRectangle().contains(x,Gdx.graphics.getHeight() - y))
             {
-                resetWhereGoHighlightAndBool();
-                resetPieceHighlight();
-                if(numberPieceActive!=11){
-                    numberPieceActive=11;
-                    setHighlightToSprite(knightW1,11);
-                    setHighlightwhereCanGo(11);
-                    return true;
-                }
+            	if(touchPieceSetting(11,knightW1))return true;
             }
             if(knightW2.getBoundingRectangle().contains(x,Gdx.graphics.getHeight() - y))
             {
-                resetWhereGoHighlightAndBool();
-                resetPieceHighlight();
-                if(numberPieceActive!=12){
-                    numberPieceActive=12;
-                    setHighlightToSprite(knightW2,12);
-                    setHighlightwhereCanGo(12);
-                    return true;
-                }
+            	if(touchPieceSetting(12,knightW2))return true;
             }
             if(bishopW1.getBoundingRectangle().contains(x,Gdx.graphics.getHeight() - y))
             {
-                resetWhereGoHighlightAndBool();
-                resetPieceHighlight();
-                if(numberPieceActive!=13){
-                    numberPieceActive=13;
-                    setHighlightToSprite(bishopW1,13);
-                    setHighlightwhereCanGo(13);
-                    return true;
-                }
+            	if(touchPieceSetting(13,bishopW2))return true;
             }
             if(bishopW2.getBoundingRectangle().contains(x,Gdx.graphics.getHeight() - y))
             {
-                resetWhereGoHighlightAndBool();
-                resetPieceHighlight();
-                if(numberPieceActive!=14){
-                    numberPieceActive=14;
-                    setHighlightToSprite(bishopW2,14);
-                    setHighlightwhereCanGo(14);
-                    return true;
-                }
+            	if(touchPieceSetting(14,bishopW2))return true;
             }
             if(queenW.getBoundingRectangle().contains(x,Gdx.graphics.getHeight() - y))
             {
-                resetWhereGoHighlightAndBool();
-                resetPieceHighlight();
-                if(numberPieceActive!=15){
-                    numberPieceActive=15;
-                    setHighlightToSprite(queenW,15);
-                    setHighlightwhereCanGo(15);
-                    return true;
-                }
+            	if(touchPieceSetting(15,queenW))return true;
             }
             if(kingW.getBoundingRectangle().contains(x,Gdx.graphics.getHeight() - y))
             {
-                resetWhereGoHighlightAndBool();
-                resetPieceHighlight();
-                if(numberPieceActive!=16){
-                    numberPieceActive=16;
-                    setHighlightToSprite(kingW,16);
-                    setHighlightwhereCanGo(16);
-                    return true;
-                }
+            	if(touchPieceSetting(16,kingW))return true;
             }
-        }
+            
+        }//turno jugador
         return false;
+    }
+    
+    public boolean touchPieceSetting(int numPiece, Sprite spritePiece){
+    	 resetWhereGoHighlightAndBool();
+         resetPieceHighlight();
+         if(numberPieceActive!=numPiece){
+             numberPieceActive=numPiece;
+             setHighlightToSprite(spritePiece,numPiece);
+             setHighlightwhereCanGo(numPiece);
+             return true;
+         }
+         return false;
     }
     
     @Override
@@ -1798,6 +1573,16 @@ public class GameScreenNewEdition implements Screen, InputProcessor{
     	//si es mi turno, juego, si no, no puedo hacer nada(deshabilitar el boton sen)
     	//System.out.println(UserSession.User);
     	//System.out.println(resultChallengeTurn);
+    	if (backButton.getBoundingRectangle().contains(screenX,	Gdx.graphics.getHeight() - screenY)) {
+    		Timer.schedule(new Task() {
+				@Override
+				public void run() {
+					backButton.setScale(1);
+					((Game)Gdx.app.getApplicationListener()).setScreen(new LobbyScreen());
+				}
+			}, 0.05f);
+			
+		}
     	if(resultChallengeTurn.equals(UserSession.User)){ 
     		
     	if ( sendButton.getBoundingRectangle().contains(screenX, Gdx.graphics.getHeight() - screenY) )
@@ -1854,7 +1639,7 @@ public class GameScreenNewEdition implements Screen, InputProcessor{
 				public void run() {
 					((Game)Gdx.app.getApplicationListener()).setScreen(new LobbyScreen());
 				}
-			}, 2);
+			}, 0.05f);
     		
 		 }
     	}
@@ -1916,20 +1701,19 @@ public class GameScreenNewEdition implements Screen, InputProcessor{
         // TODO Auto-generated method stub
         return false;
     }
-    
+    // START REQUESTS //
     private String sendGet_getChallengeTurn(String user1, String user2) throws Exception {
-		String url = "http://84.123.125.224/chesstime/getChallengeTurn.php?user1="+user1+"&user2="+user2;
+		String url = "http://chesstime.net46.net/getChallengeTurn.php?user1="+user1+"&user2="+user2;
 		String response="";
 		URL obj = new URL(url);
 		HttpURLConnection con = (HttpURLConnection) obj.openConnection(); 
 		BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
 		response = in.readLine();
-		System.out.println("respones: "+response);
 		in.close();
 		return response;
 	}
     private String sendGet_getPlay(String user1, String user2) throws Exception {
-		String url = "http://84.123.125.224/chesstime/getPlay.php?user1="+user1+"&user2="+user2;
+		String url = "http://chesstime.net46.net/getPlay.php?user1="+user1+"&user2="+user2;
 		String response="";
 		URL obj = new URL(url);
 		HttpURLConnection con = (HttpURLConnection) obj.openConnection(); 
@@ -1939,7 +1723,7 @@ public class GameScreenNewEdition implements Screen, InputProcessor{
 		return response;
 	}
     private String sendGet_isInProcess(String user1, String user2) throws Exception {
-  		String url = "http://84.123.125.224/chesstime/isInProcess.php?user1="+user1+"&user2="+user2;
+  		String url = "http://chesstime.net46.net/isInProcess.php?user1="+user1+"&user2="+user2;
   		String response="";
   		URL obj = new URL(url);
   		HttpURLConnection con = (HttpURLConnection) obj.openConnection(); 
@@ -1949,7 +1733,7 @@ public class GameScreenNewEdition implements Screen, InputProcessor{
   		return response;
   	}
     private String sendGet_play(String user1, String user2, int originX,int originY, int destinyX, int destinyY) throws Exception {
-    	String url = "http://84.123.125.224/chesstime/play.php?user1="+ user1 + "&user2=" + user2 + "&originX=" + originX + "&originY="+ originY + "&destinyX=" + destinyX + "&destinyY=" + destinyY + "&turn=" + getOtherUser();
+    	String url = "http://chesstime.net46.net/play.php?user1="+ user1 + "&user2=" + user2 + "&originX=" + originX + "&originY="+ originY + "&destinyX=" + destinyX + "&destinyY=" + destinyY + "&turn=" + getOtherUser();
 		String response = "";
 		URL obj = new URL(url);
 		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
@@ -1959,7 +1743,7 @@ public class GameScreenNewEdition implements Screen, InputProcessor{
 		return response;
 	}
     private String sendGet_setInProcessOne(String user1, String user2) throws Exception {
-  		String url = "http://84.123.125.224/chesstime/setInProcessOne.php?user1="+user1+"&user2="+user2;
+  		String url = "http://chesstime.net46.net/setInProcessOne.php?user1="+user1+"&user2="+user2;
   		String response="";
   		URL obj = new URL(url);
   		HttpURLConnection con = (HttpURLConnection) obj.openConnection(); 
@@ -1968,6 +1752,7 @@ public class GameScreenNewEdition implements Screen, InputProcessor{
   		in.close();
   		return response;
   	}
+    // END REQUESTS //
     
     public String getOtherUser(){
     	if(UserSession.User.equals(actualUser1())) return actualUser2();

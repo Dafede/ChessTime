@@ -204,7 +204,7 @@ public class LoginScreen implements Screen, InputProcessor, TextInputListener {
 					if (checkLoginRequest())
 						((Game) Gdx.app.getApplicationListener()).setScreen(new LobbyScreen());
 				}
-			}, 0.1f);
+			}, 0.05f);
 
 		}
 
@@ -275,7 +275,8 @@ public class LoginScreen implements Screen, InputProcessor, TextInputListener {
 	
 	private String sendGet(String username, String password) throws Exception {
 		//http://84.123.125.224/chesstime/login.php?username=asd&password=asddd
-		String url = "http://84.123.125.224/chesstime/login.php?username="+username+"&password="+password;
+		String url = "http://chesstime.net46.net/login.php?username="+username+"&password="+password;
+		//http://chesstime.net46.net/getChallengeTurn.php?user1=david&user2=ernesto
 		String response="";
 		URL obj = new URL(url);
 		HttpURLConnection con = (HttpURLConnection) obj.openConnection(); 
